@@ -308,5 +308,5 @@ eastcoast_kwargs = dict(timerange=time_range, coords_dict=eastcoast_vars_dict['u
                        sfc_dict=eastcoast_vars_dict['sfc']['data'], pres_dict=pres_vardictE, pres1=500, pres2=500,
                        plot_type='vort_advec')
 
-mid_pres = cmdwst = plot_composite_chart(**midwest_kwargs)
-east_pres = ceastcoast= plot_composite_chart(**eastcoast_kwargs)
+cmdwst = plot_composite_chart(**midwest_kwargs)
+ceastcoast= plot_composite_chart(**eastcoast_kwargs)

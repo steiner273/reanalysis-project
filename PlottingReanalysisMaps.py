@@ -25,20 +25,13 @@ class ReanalysisData(object):
         lats = datafromfile['latitude'][:].squeeze()
         if 'level' in datafromfile.variables.keys():
             levels = datafromfile['level'][:]
-            varData = {}
             coord_vars = ['longitude', 'latitude', 'time', 'level']
-            for key in datafromfile.variables.keys():
-                if key not in coord_vars:
-                    varData[key] = datafromfile[key][:].squeeze()
-            
+            varData = {key: datafromfile[key][:].squeeze() for key in datafromfile.variables.keys() if key not in coord_vars}
             data_dict = {'lons': lons, 'lats': lats, 'time': time_vals, 'levels': levels,
                          'data': varData}
         else:
-            varData = {}
             coord_vars = ['longitude', 'latitude', 'time']
-            for key in datafromfile.variables.keys():
-                if key not in coord_vars:
-                    varData[key] = datafromfile[key][:].squeeze()
+            varData={key: datafromfile[key][:].squeeze() for key in datafromfile.variables.keys() if key not in coord_vars}
             data_dict = {'lons': lons, 'lats': lats, 'time': time_vals,
                         'data': varData}
     
@@ -207,10 +200,10 @@ def plot_kwargs(pres, plot_type):
             
 def plot_composite_chart(timerange, coords_dict, sfc_dict, pres_dict, pres1, pres2, plot_type):
     
-    calc_list = {'calc_thetae_advec': calc_thetae_advec, 'calc_vort_advec': calc_vort_advec,
+    calc_dict = {'calc_thetae_advec': calc_thetae_advec, 'calc_vort_advec': calc_vort_advec,
                  'calc_moist_advec': calc_moist_advec, 'calc_qvectors': calc_qvectors,
                 'calc_div': calc_div}
-    plot_list = {'plot_thetae_advec': plot_thetae_advec, 'plot_vort_advec': plot_vort_advec, 
+    plot_dict = {'plot_thetae_advec': plot_thetae_advec, 'plot_vort_advec': plot_vort_advec, 
                  'plot_moist_advec': plot_moist_advec, 'plot_qvectors': plot_qvectors,
                 'plot_div': plot_div}
     
@@ -233,9 +226,9 @@ def plot_composite_chart(timerange, coords_dict, sfc_dict, pres_dict, pres1, pre
     vwind = pres_dict[pres2]['v']
     dx, dy = mpcalc.lat_lon_grid_deltas(coords_dict['lons'], coords_dict['lats'])
     if plot_type == 'vort_advec':
-        advec = calc_list[f'calc_{plot_type}'](dx, dy, lat2d, pres_dict, pres2)
+        advec = calc_dict[f'calc_{plot_type}'](dx, dy, lat2d, pres_dict, pres2)
     else:
-        advec = calc_list[f'calc_{plot_type}'](dx, dy, pres_dict, pres2)
+        advec = calc_dict[f'calc_{plot_type}'](dx, dy, pres_dict, pres2)
     
     research_image_fold = '/Users/steiner/Documents/Python_plots/storm_composite_charts/'
     if os.path.exists(research_image_fold):
@@ -260,7 +253,7 @@ def plot_composite_chart(timerange, coords_dict, sfc_dict, pres_dict, pres1, pre
                         linewidths=1.5, linestyles='--', colors='black', transform=kwargsdict['data_proj'])
         
         if plot_type != 'div':
-            ax, advec_cons, units = plot_list[f'plot_{plot_type}'](ax, lon2d, lat2d, advec[time_step], kwargsdict)
+            ax, advec_cons, units = plot_dict[f'plot_{plot_type}'](ax, lon2d, lat2d, advec[time_step], kwargsdict)
             plt.colorbar(advec_cons, orientation='horizontal', 
                      label=f'{title_dict[plot_type]} ({units})', pad=0.02, fraction=0.04)
         else:
@@ -278,7 +271,7 @@ def plot_composite_chart(timerange, coords_dict, sfc_dict, pres_dict, pres1, pre
         ax.set_title(txt_timest, fontsize=kwargsdict['fontsize'], fontweight='bold', loc='right')
         ax.set_title(f'ERA5 {pres1} MB height, {pres2} MB {title_dict[plot_type]}/wind, MSLP/pressure tendency (central_pressure = {sfcpres[time_step].min():.0f} MB)',loc='left', fontsize=11, fontweight='bold')
         fig.tight_layout()
-        fig.savefig(f'{research_image_fold}{plot_type}_{txt_timest}.jpg', dpi=800)
+        fig.savefig(f'{research_image_fold}{plot_type}_{txt_timest}.png', dpi=800)
         plt.show()
     return cpressures
 
